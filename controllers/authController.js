@@ -1,54 +1,20 @@
-const db = require('../db/conn');
-const { sendOtp, verifyStoredOtp } = require('../utils/otpService');
-const { spawn } = require('child_process');
-const path = require('path');
+const express = require('express');
+const { generateToken } = require('../utils/jwt');
+const router = express.Router();
 
-let currentPhone = null; // Temporary storage for session
+router.post('/login', (req, res) => {
+  const { id } = req.body;
 
-// POST /api/auth/login
-exports.loginWithFace = (req, res) => {
-    const { phone } = req.body;
+  if (!id) {
+    return res.status(400).send('User ID is required');
+  }
 
-    if (!phone) return res.status(400).json({ message: 'Phone number required' });
+  const token = generateToken(id);
 
-    db.query('SELECT * FROM users WHERE phone = ?', [phone], (err, results) => {
-        if (err) return res.status(500).json({ message: 'Database error' });
-        if (results.length === 0) return res.status(404).json({ message: 'User not found' });
+  res.json({
+    message: 'Login successful',
+    token: token,
+  });
+});
 
-        const user = results[0];
-        const storedImage = path.join(__dirname, '..', 'uploads', user.photo);
-
-        // Call Python script for face detection
-        const python = spawn('python', ['utils/faceMatch.py', storedImage]);
-
-        python.stdout.on('data', (data) => {
-            const output = data.toString().trim();
-
-            if (output === 'MATCH') {
-                sendOtp(phone); // Send OTP
-                currentPhone = phone;
-                res.json({ message: 'Face matched, OTP sent' });
-            } else {
-                res.status(401).json({ message: 'Face not matched' });
-            }
-        });
-
-        python.stderr.on('data', (data) => {
-            console.error(`Python error: ${data}`);
-            res.status(500).json({ message: 'Face detection failed' });
-        });
-    });
-};
-
-// POST /api/auth/verify-otp
-exports.verifyOtp = (req, res) => {
-    const { otp } = req.body;
-    if (!otp || !currentPhone) return res.status(400).json({ message: 'OTP or session missing' });
-
-    const isValid = verifyStoredOtp(currentPhone, otp);
-    if (isValid) {
-        res.json({ message: 'Login successful' });
-    } else {
-        res.status(401).json({ message: 'Invalid OTP' });
-    }
-};
+module.exports = router;
