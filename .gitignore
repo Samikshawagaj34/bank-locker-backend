@@ -1,3 +1,30 @@
-node_modules
+
+
+# Node.js
+node_modules/
 .env
 .env.example
+
+# Python
+__pycache__/
+*.pyc
+
+# Uploads (User Uploaded Files)
+uploads/
+
+# System Files
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# npm-debug files
+npm-debug.log*
+
+# VSCode settings (optional)
+.vscode/
+
+# Misc
+*.swp
