@@ -15,17 +15,15 @@ app.use(bodyParser.json());
 
 // ✅ Import Routes
 const authRoutes = require('./routes/authRoutes');
+const userRoutes = require('./routes/userRoutes');
+const adminauthRoutes = require('./routes/adminauthRoutes'); // ✅ Added admin routes
+const adminDashboardRoutes = require('./routes/admindashboardRoutes'); // ✅ Added admin dashboard routes
 
 // ✅ Use Routes
 app.use('/api/auth', authRoutes);
-
-const userRoutes = require('./routes/userRoutes');
 app.use('/api/users', userRoutes);
-
-
-
-
-
+app.use('/api/admin', adminauthRoutes); // ✅ Use admin auth route
+app.use('/api/admin/dashboard', adminDashboardRoutes); // ✅ Use admin dashboard routes
 
 // ✅ Start Server
 const PORT = process.env.PORT || 5000;

@@ -1,24 +1,32 @@
-const twilio = require('twilio');
-require('dotenv').config();
-
-const client = new twilio(
-    process.env.TWILIO_ACCOUNT_SID,
-    process.env.TWILIO_AUTH_TOKEN
-);
+const axios = require('axios');
+const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString();
 
 exports.sendOTP = async (phone) => {
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  const otp = generateOTP();
+  const message = `Your OTP is:${otp}.Do not share this with anyone for security reasons.`;
 
-    try {
-        await client.messages.create({
-            body: `Your OTP for Bank Locker Security is: ${otp}`,
-            from: process.env.TWILIO_PHONE_NUMBER,
-            to: phone.startsWith('+') ? phone : `+91${phone}`   // India Number असल्यास +91 लावा
-        });
-        console.log(`OTP ${otp} sent successfully to ${phone}`);
-        return otp;
-    } catch (error) {
-        console.error('Error sending OTP:', error);
-        throw new Error('Failed to send OTP');
-    }
+  try {
+    const response = await axios.post(
+      'https://www.fast2sms.com/dev/bulkV2',
+      {},
+      {
+        params: {
+          message,
+          language: 'unicode',
+          route: 'q',
+          numbers: phone
+        },
+        headers: {
+          authorization: process.env.FAST2SMS_API_KEY,
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      }
+    );
+
+    console.log("✅ OTP sent:", response.data);
+    return otp;
+  } catch (error) {
+    console.error("❌ OTP send error:", error.response?.data || error.message);
+    return null;
+  }
 };

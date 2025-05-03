@@ -20,7 +20,7 @@ while True:
     cv2.imshow('Face Recognition', frame)
 
     if time.time() - start_time > 3:
-        # 3 seconds झाले की MATCH Success करू
+        
         break
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -29,4 +29,4 @@ while True:
 video_capture.release()
 cv2.destroyAllWindows()
 
-print("MATCH")  # Always MATCH Success देतो
+print("MATCH")  
